@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Washington State Parks Map</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌲</text></svg>">
+<style>
+:root{
+  --bg:#fcfcfb; --surface-1:#f3f2ee; --surface-2:#ffffff;
+  --text-primary:#1a1a19; --text-secondary:#5c5b56; --text-muted:#8a8984;
+  --border:rgba(0,0,0,0.12); --border-strong:rgba(0,0,0,0.26);
+  --radius:8px;
+  --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#1a1a19; --surface-1:#242423; --surface-2:#2e2e2c;
+    --text-primary:#f0efec; --text-secondary:#b4b2ab; --text-muted:#85847e;
+    --border:rgba(255,255,255,0.12); --border-strong:rgba(255,255,255,0.26);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text-primary);font-family:var(--font-sans);font-size:15px;line-height:1.5}
+main{max-width:760px;margin:0 auto;padding:28px 16px 40px}
+h1{font-size:22px;font-weight:600;margin:0 0 4px;letter-spacing:-0.01em}
+.intro{font-size:14px;color:var(--text-secondary);margin:0 0 18px;max-width:62ch}
+input[type=text]{height:34px;padding:0 10px;font:inherit;font-size:14px;color:var(--text-primary);background:var(--surface-2);border:0.5px solid var(--border-strong);border-radius:var(--radius)}
+input[type=text]:focus{outline:2px solid #2a78d6;outline-offset:1px}
+button{font:inherit;cursor:pointer;color:var(--text-primary);background:var(--surface-2);border:0.5px solid var(--border-strong);border-radius:var(--radius)}
+button:focus-visible,summary:focus-visible{outline:2px solid #2a78d6;outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+details.dd{position:relative;display:inline-block}
+details.dd>summary{list-style:none;cursor:pointer;padding:6px 12px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-secondary);background:var(--surface-1);white-space:nowrap}
+details.dd>summary::-webkit-details-marker{display:none}
+details.dd[open]>summary{border-color:var(--border-strong);color:var(--text-primary);background:var(--surface-2)}
+.pnl{position:absolute;z-index:20;top:calc(100% + 5px);left:0;width:255px;max-width:calc(100vw - 32px);max-height:270px;overflow-y:auto;background:var(--surface-2);border:0.5px solid var(--border-strong);border-radius:10px;padding:6px;box-shadow:0 4px 16px rgba(0,0,0,0.10)}
+.pnl.right{left:auto;right:0}
+.pnl.narrow{width:210px}
+.opt{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:var(--radius);cursor:pointer;font-size:12.5px;color:var(--text-primary)}
+.opt:hover{background:var(--surface-1)}
+.opt input{width:auto;height:auto;margin:0;flex:none}
+.opt .c{margin-left:auto;color:var(--text-muted);font-variant-numeric:tabular-nums;font-size:11.5px}
+.sw{width:9px;height:9px;border-radius:50%;flex:none}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:var(--radius);background:var(--surface-2);border:0.5px solid var(--border);font-size:12px;color:var(--text-secondary);cursor:pointer}
+footer{margin-top:18px;padding-top:12px;border-top:0.5px solid var(--border);font-size:12px;color:var(--text-muted)}
+footer a{color:var(--text-secondary)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Washington State Parks</h1>
+  <p class="intro">141 state parks, filterable by activities, amenities, park type, and whether dogs are allowed. Hover a marker for details, click to open the park's official page.</p>
+
+  <h2 class="sr-only">Interactive map of Washington state parks, filterable by activity, amenity, park type and dog policy, with marker size scaled to acreage.</h2>
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px">
+    <details class="dd" id="ddA"><summary id="sA">Activities</summary><div class="pnl" id="pnlA"></div></details>
+    <details class="dd" id="ddM"><summary id="sM">Amenities</summary><div class="pnl" id="pnlM"></div></details>
+    <details class="dd" id="ddC"><summary id="sC">Park type</summary><div class="pnl right" id="pnlC"></div></details>
+    <details class="dd" id="ddD"><summary id="sD">Dogs</summary><div class="pnl right narrow" id="pnlD"></div></details>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+    <input id="q" type="text" placeholder="Search parks" aria-label="Search parks" style="flex:1;min-width:150px">
+    <span id="cnt" style="font-size:13px;color:var(--text-secondary);font-variant-numeric:tabular-nums"></span>
+    <button id="rst" style="font-size:13px;padding:5px 11px">Reset</button>
+  </div>
+  <div id="chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+  <div id="wrap" style="position:relative;width:100%;background:var(--surface-1);border-radius:12px;overflow:hidden">
+    <div id="map"></div>
+    <div id="tip" style="position:absolute;pointer-events:none;opacity:0;background:var(--surface-2);border:0.5px solid var(--border-strong);border-radius:var(--radius);padding:7px 11px;font-size:13px;line-height:1.45;transition:opacity .1s;max-width:270px"></div>
+    <div id="empty" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:13px;color:var(--text-secondary);background:var(--surface-1)">No parks match every filter. Try removing one.</div>
+  </div>
+  <p style="font-size:12px;color:var(--text-muted);margin:8px 2px 0">Marker size scales with acreage. Scroll or pinch to zoom, drag to pan.</p>
+
+  <footer>
+    Park data from <a href="https://parks.wa.gov/find-parks" target="_blank" rel="noopener">parks.wa.gov</a> and the Washington State Parks GIS program, retrieved August 18, 2026. Unofficial and not affiliated with Washington State Parks — check the official park page for current hours, closures, and rules. Six long-distance trail segments without a single entrance point are not shown.
+  </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+const D={"A":["Bird Watching","Boating","Camping","Fishing","Hiking, Walking, Rolling and Running","Kayaking","Metal Detecting","Paddleboarding","Swimming","Biking","Horseback Riding","Ranger Talk","Volunteer","Winter Camping","Beach Exploration","Windsurfing","Rock Climbing","Shellfishing","Crabbing","Scuba Diving","Geocaching","Folk Arts Activities","Disc Golf","Golf","Interpretive and Visitor Centers","Paragliding","Tours","Winter Activities","Mountain Biking","Long-Distance Trails","First Day Hike Events","Off-Road-Vehicle Driving"],"M":["Accessible Campsites","Accessible Restrooms","Drinking Water","Fire Pit","Park Ranger Station","Recycling","Restrooms","Showers","Trash Service","Wi-Fi","Boat Ramp","Dock","Grill","Picnic Shelters","Picnic Tables","Accessible Parking","Parking","Trailer Dump","Horseshoe Pits","Volleyball","Concessions","Hiking Trails","Interpretive Opportunities","Bike Trails","Equestrian Trails","Automated Pay Station","Firewood","Groceries","Kitchen Shelter","Ball Fields","Playgrounds","Double campsites","Moorage","Sink","Accessible Trails","ADA Buildings","Soccer Field","Tennis Court","Basketball Court","Amphitheater","Buoys","Boardwalk","Pumpout","Lighthouse","ADA Boat Launch","Electric Vehicle Charging","Observation Deck","Sno-Park","Long Distance Trail","Marina slips","Event Table Rentals","Kitchen","Fuel"],"P":[["Mount Spokane","sp",47.9255,-117.1127,12553,1,"mount-spokane-state-park",[0,2,4,6,9,10,12,27,28],[1,2,3,4,6,9,13,14,15,16,21,23,24,25,47]],["Riverside","sp",47.7509,-117.5326,10285,1,"riverside-state-park",[0,1,2,3,4,5,6,7,8,9,10,12,13,16,24,27,28,29,31],[0,1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17,21,22,23,24,25,28,34,44]],["Ginkgo Petrified Forest","sp",46.9545,-119.9883,7125,1,"ginkgo-petrified-forest-state-park",[1,2,3,4,8,12,24,29],[0,1,2,6,12,14,15,16,21,22,25,35]],["Moran","sp",48.6654,-122.8237,5617,1,"moran-state-park",[0,1,2,3,4,5,7,8,9,10,12,13,14,24,28],[0,1,2,3,4,6,7,8,10,11,12,13,14,15,16,17,20,21,22,23,24,25,26,28,30,31]],["Steamboat Rock","sp",47.8659,-119.1276,5043,1,"steamboat-rock-state-park",[0,1,2,3,4,5,7,8,9,10,12,13,16,27],[0,1,2,3,4,5,6,7,8,10,11,14,15,16,17,19,20,21,22,23,24,25,30,34,38,44]],["Beacon Rock","sp",45.6279,-122.0239,4471,1,"beacon-rock-state-park",[0,1,2,3,4,5,6,7,9,10,13,15,16],[0,1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,21,22,23,24,25,26,28,30,31,32,33,34]],["Deception Pass","sp",48.3973,-122.646,3926,1,"deception-pass-state-park",[0,1,2,3,4,5,7,8,9,11,12,13,14,17,18,19,20,21,24,28],[0,1,2,3,4,6,7,8,10,11,12,13,14,15,16,17,20,21,22,23,24,25,26,28,31,32,34,35,39,40]],["Sun Lakes-Dry Falls","sp",47.5917,-119.362,3814,1,"sun-lakes-dry-falls-state-park",[0,1,2,4,5,6,7,8,9,12,13,23,24],[0,1,2,3,4,6,7,8,10,14,15,16,17,18,20,21,22,25,30,32,39]],["Columbia Hills","hist",45.643,-121.1034,3638,1,"columbia-hills-historical-state-park",[0,1,2,3,4,5,7,8,9,10,11,12,16,25,26],[2,3,6,7,10,14,16,17,18,21,22,23,24,25]],["Miller Peninsula","prop",48.0652,-122.9471,2884,1,"miller-peninsula-state-park-property",[0,4,10,14,28],[1,6,14,15,16,21,23,24,25,34]],["Larrabee","sp",48.6538,-122.4902,2748,1,"larrabee-state-park",[0,1,2,3,4,5,6,7,8,9,10,12,13,14,17,18,19,20],[0,1,2,3,4,5,6,7,8,10,12,13,14,15,16,17,20,21,22,23,24,25,26,28,30,31,33,39]],["Olallie","sp",47.436,-121.6557,2335,1,"olallie-state-park",[0,3,4,5,9,16,20,28,29],[1,6,12,14,15,16,21,23,25,34]],["Cape Disappointment","sp",46.2918,-124.0667,2024,1,"cape-disappointment-state-park",[0,1,2,3,4,6,9,13,14,17,18,21,23,24],[0,1,2,3,4,5,6,7,8,10,11,14,15,16,17,20,21,22,23,25,26,27,34,35,39,42,43]],["Mount Pilchuck","sp",48.0581,-121.7972,1903,1,"mount-pilchuck-state-park",[0,4,27],[6,14,21]],["Leadbetter Point","sp",46.5979,-124.0473,1732,1,"leadbetter-point-state-park",[0,3,4,5,7,14,17,18],[6,15,16,21]],["Squak Mountain","sp",47.499,-122.0466,1591,1,"squak-mountain-state-park",[0,4,6,10,20],[1,6,14,16,21,22,24,25]],["Fort Flagler","hist",48.0858,-122.7016,1463,1,"fort-flagler-historical-state-park",[0,1,2,3,4,5,7,8,9,11,12,13,14,17,18,19,24,25,26],[0,1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17,18,20,21,22,25,26,27,30,32,34,35,38,40,41]],["Wallace Falls","sp",47.8672,-121.6784,1447,1,"wallace-falls-state-park",[0,2,4,5,9,13,16,20],[0,1,2,3,4,6,7,8,12,13,14,16,21,22,25,26,34,39]],["Nisqually","sp",46.8632,-122.3293,1292,1,"nisqually-state-park",[0,3,4,9,10],[6,15,16,21,23,24]],["Pearrygin Lake","sp",48.4937,-120.1583,1211,1,"pearrygin-lake-state-park",[0,1,2,3,4,5,7,8,9,27],[0,1,2,3,4,6,7,8,10,11,12,14,15,16,17,18,19,21,22,23,26,31,47]],["Blake Island","mar",47.5376,-122.4926,1127,1,"blake-island-marine-state-park",[0,1,2,3,4,5,7,8,9,13,14,17,18,19,20],[2,3,4,6,7,11,13,14,18,21,23,25,32,40]],["Klickitat","tr",45.6968,-121.2901,1119,1,"klickitat-state-park-trail",[0,4,9,29],[15,16,21,23,48]],["Dosewallips","sp",47.6964,-122.9195,1064,1,"dosewallips-state-park",[0,2,3,4,8,11,13,14,17],[0,1,2,3,4,6,7,8,12,13,14,15,16,17,21,22,26,28,31,35,39,46]],["Fort Casey","hist",48.1615,-122.6777,1000,1,"fort-casey-historical-state-park",[0,1,2,3,4,5,12,13,14,18,19,24],[1,2,3,4,6,7,8,10,12,14,16,21,22,25,26,43]],["Willapa Hills","tr",46.6479,-122.974,954,1,"willapa-hills-state-park-trail",[0,4,9,10],[6,15,16,21,23,24,34,48]],["Millersylvania","sp",46.9107,-122.9087,903,1,"millersylvania-state-park",[0,1,2,3,4,5,6,7,8,9,12,13],[0,1,2,3,4,6,7,8,11,12,13,14,15,16,17,18,20,21,22,23,25,26,28,31,33,39,41]],["Brooks Memorial","sp",45.9502,-120.6659,884,1,"brooks-memorial-state-park",[0,2,4,9,10,22],[2,3,6,7,12,13,14,16,17,21,23,24,29]],["Fields Spring","sp",46.0801,-117.1669,826,1,"fields-spring-state-park",[0,2,4,9,10,12,13,27],[1,2,3,4,5,6,7,8,12,13,14,15,16,17,18,19,21,23,24,26,28,29,30,39,47]],["Sucia Island","mar",48.7581,-122.9089,814,1,"sucia-island-marine-state-park",[0,1,2,3,4,5,7,8,14,17,18,19],[3,4,6,11,13,14,21,32,40]],["Potholes","sp",46.9806,-119.3417,773,1,"potholes-state-park",[0,1,2,3,4,5,7,8,12,13],[0,1,2,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19,21,23,25,30]],["Jones Island","mar",48.6154,-123.0471,735,1,"jones-island-marine-state-park",[0,1,2,3,4,5,7,8,13,14,17,18],[2,3,6,11,12,13,14,21,32,34,40]],["Fort Ebey","sp",48.2228,-122.7615,712,1,"fort-ebey-state-park",[0,2,3,4,5,7,8,9,12,14,17,25,28],[0,1,2,4,6,7,8,12,13,14,15,16,21,22,23,25,26,29]],["Lake Easton","sp",47.2443,-121.1858,679,1,"lake-easton-state-park",[0,1,2,3,5,7,8,9,12,13,27,29],[0,1,2,3,6,7,8,10,11,12,14,16,17,18,21,22,25,26,30,31,38,39,47]],["Birch Bay","sp",48.9089,-122.763,664,1,"birch-bay-state-park",[0,1,2,3,4,5,7,8,9,12,13,14,15,17,18,19],[0,1,2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,20,21,22,23,25,26,28,30,31,33,38,39]],["Fort Columbia","sp",46.2607,-123.9185,649,1,"fort-columbia-state-park",[0,4,14,24],[1,4,6,14,15,16,21,22,25]],["Rockport","sp",48.4878,-121.6156,632,1,"rockport-state-park",[0,4,6,9],[1,2,3,4,6,8,12,13,14,15,16,21,22,34,39]],["Bridgeport","sp",48.0122,-119.6171,623,1,"bridgeport-state-park",[0,1,2,3,4,5,7,8,9,13,20],[0,1,2,3,4,5,6,7,8,9,10,11,12,14,15,16,17,18,21,23,26,30,34,35]],["Lewis and Clark","sp",46.5224,-122.8134,616,1,"lewis-clark-state-park",[2,4,9,10],[2,3,4,6,7,12,13,14,15,18,21,23,24,26,28,29,31,39]],["Grayland Beach","sp",46.7941,-124.0942,595,1,"grayland-beach-state-park",[0,2,3,4,6,8,9,13,14,17,18],[0,1,2,3,4,6,7,8,14,15,16,17,20,21,22,26,39]],["James Island","mar",48.5122,-122.7751,581,1,"james-island-marine-state-park",[1,2,3,4,5,7,13,14,17,18,19],[6,11,13,14,21,32,40]],["Federation Forest","sp",47.1531,-121.6893,574,1,"federation-forest-state-park",[0,3,4,9,12,24],[1,2,3,6,8,12,13,14,16,21,22,25,41]],["Harstine Island","sp",47.2653,-122.8779,566,1,"harstine-island-state-park",[0,1,3,4,5,7,8,11,12,14,15,17,26,30],[1,6,12,14,15,16,21,22,41]],["Westport Light","sp",46.8965,-124.1211,562,1,"westport-light-state-park",[0,3,4,6,9,14,15,17,18],[1,2,6,7,12,14,15,16,21,22,25,34,41,43,46]],["Griffiths-Priday","sp",47.1147,-124.178,544,1,"griffiths-priday-state-park",[0,3,4,6,14,17],[6,12,13,14,16,21]],["Kanaskat-Palmer","sp",47.3121,-121.8988,541,1,"kanaskat-palmer-state-park",[0,2,3,4,5,6,12,13,14],[0,1,2,3,4,5,6,7,8,12,13,14,15,16,17,18,21,25,26,28,31]],["Lake Sammamish","sp",47.5569,-122.0632,537,1,"lake-sammamish-state-park",[0,1,3,4,5,6,7,8,9,13,20,21],[1,2,4,5,6,8,10,11,12,13,14,15,16,17,19,20,21,22,23,25,28,29,30,34,35,36,41,42,45,50]],["Seaquest","sp",46.2959,-122.8177,505,1,"seaquest-state-park",[2,4,5,9,12,13,24],[1,2,3,4,5,6,7,8,9,13,14,16,17,18,19,21,22,26,28,30,31,39,41]],["Flaming Geyser","sp",47.2774,-122.0245,503,1,"flaming-geyser-state-park",[0,3,4,5,8,10],[1,13,14,16,19,21,22,24,30,34]],["Lake Wenatchee","sp",47.8101,-120.7236,500,1,"lake-wenatchee-state-park",[0,1,2,3,4,5,7,8,9,10,12,13,14,21,27],[0,1,2,3,4,6,7,8,10,11,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,28,30,33,35,39,44,47]],["Anderson Lake","sp",48.0192,-122.8004,496,1,"anderson-lake-state-park",[0,1,3,4,5,7,9,10,11],[6,8,10,14,16,21,22,23,24]],["Bridle Trails","sp",47.6533,-122.1736,489,1,"bridle-trails-state-park",[0,4,6,10,20,21],[1,2,6,14,16,21,24,35]],["Cama Beach","hist",48.1455,-122.5061,489,1,"cama-beach-historical-state-park",[0,1,3,4,5,7,8,9,12,14,18,20],[1,2,4,6,8,9,14,15,16,18,20,21,22,23,30]],["Dash Point","sp",47.3144,-122.4062,463,1,"dash-point-state-park",[0,2,4,5,6,7,8,9,11,12,13,14,20,28],[0,1,2,3,4,6,7,8,12,13,14,15,16,17,21,22,23,25,26,39]],["Stuart Island","mar",48.6866,-123.198,433,2,"stuart-island-marine-state-park",[1,2,3,5,7,8,13,15,17,18],[11,14,21,32,42,43]],["Fort Worden","hist",48.1344,-122.7669,432,1,"fort-worden-historical-state-park",[0,2,3,4,5,7,8,9,11,12,13,14,18,19,24,26],[0,1,2,3,4,5,6,7,8,12,13,14,15,16,17,20,21,22,23,25,28,32,34,35,37,43]],["Reed Island","sp",45.5531,-122.3058,427,1,"reed-island-state-park",[0,1,5,8,14],[14]],["Ike Kinswa","sp",46.5553,-122.53,421,1,"ike-kinswa-state-park",[0,1,2,3,4,5,7,8,9,13,15],[0,2,3,4,5,6,7,8,10,12,13,14,15,16,17,18,19,21,23,26,30]],["Fort Townsend","hist",48.0734,-122.7893,413,1,"fort-townsend-historical-state-park",[0,1,2,3,4,9,11,12,14,17,19],[2,3,4,6,7,8,12,13,14,15,16,17,18,21,22,23,26,32,39,40]],["South Whidbey","sp",48.0565,-122.5913,381,1,"south-whidbey-state-park",[0,4,6,12],[1,2,6,8,12,13,14,15,16,17,21,22,25,39]],["Doug's Beach","sp",45.6769,-121.2347,379,1,"dougs-beach-state-park",[0,3,7,8,15],[6,14,16]],["Cutts Island","mar",47.3214,-122.6873,351,1,"cutts-island-marine-state-park",[0,1,3,5,7,8,14,15,17,19],[32,40]],["Saint Edward","sp",47.7333,-122.2563,347,1,"saint-edward-state-park",[0,1,3,4,7,8,9,12,20,28],[1,2,4,5,6,8,12,14,15,16,19,20,21,22,23,25,29,30,34,35]],["Battle Ground Lake","sp",45.8047,-122.4952,299,1,"battle-ground-lake-state-park",[1,2,3,4,5,6,7,8,9,10,12,13],[0,1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,28,29,30]],["Camano Island","sp",48.1264,-122.4932,283,1,"camano-island-state-park",[0,1,2,3,4,5,6,7,8,9,11,12,13,14,18,19,20],[0,1,2,3,4,6,7,8,10,11,12,13,14,15,16,17,21,22,23,25,26,28,33,39]],["Kopachuck","sp",47.3081,-122.6804,280,1,"kopachuck-state-park",[0,1,3,4,5,6,7,8,14,15,17,19],[2,4,6,8,12,13,14,16,21,30,32,40]],["Sacajawea","hist",46.2012,-119.0402,267,1,"sacajawea-historical-state-park",[0,1,3,4,5,7,8,9,12,20,24,29],[1,2,4,6,8,10,11,12,13,14,15,16,18,19,21,22,28,30,32,34,35,40,46]],["Yakima Sportsman","sp",46.5919,-120.4629,267,1,"yakima-sportsman-state-park",[0,2,3,4,6,12,21],[0,1,2,3,6,7,8,13,14,15,16,17,18,19,21,22,25,28,30,34]],["Ocean City","sp",47.0367,-124.1604,257,1,"ocean-city-state-park",[0,2,3,4,6,13,14,17],[0,1,2,3,4,6,7,8,13,14,15,16,17,21,31,39]],["Lake Sylvia","sp",47.0007,-123.5903,252,1,"lake-sylvia-state-park",[0,2,3,4,5,6,7,8,9,12,13],[0,1,2,3,4,6,7,8,12,13,14,15,16,17,21,23,25,26,28,30,33]],["Penrose Point","sp",47.2577,-122.7485,250,1,"penrose-point-state-park",[0,1,2,3,4,5,6,7,8,9,11,13,14,19],[0,1,2,3,5,6,7,8,11,12,13,14,15,16,17,18,21,22,26,31,32,35,40]],["Shine Tidelands","sp",47.8841,-122.6332,249,1,"shine-tidelands-state-park",[0,1,3,5,7,8,14,15,17,18],[14,16]],["Squilchuck","sp",47.3103,-120.3734,247,1,"squilchuck-state-park",[0,4,9,10,27,28],[2,3,6,7,8,12,14,16,21,22,23,24]],["Twin Harbors","sp",46.8552,-124.1094,229,1,"twin-harbors-state-park",[0,2,3,4,5,6,7,8,13,14,15,17,18],[0,1,2,3,4,6,7,8,12,14,15,16,17,21,22,26]],["Twenty-Five Mile Creek","sp",47.9925,-120.2591,227,1,"twenty-five-mile-creek-state-park",[0,1,2,3,4,5,6,7,8,19],[0,1,2,3,4,6,7,8,9,10,11,12,15,16,17,18,19,20,26,27,44,49,52]],["Patos Island","mar",48.7847,-122.9559,226,1,"patos-island-marine-state-park",[0,1,2,3,4,5,7,13,14,18,19],[6,14,32,40,43]],["McMicken Island","mar",47.2479,-122.8714,222,2,"mcmicken-island-marine-state-park",[1,3,5,7,14,17,18],[6,21,32,40]],["Olmstead Place","hist",46.9765,-120.4725,221,1,"olmstead-place-historical-state-park",[0,3,4,11,12,24,27],[1,2,6,8,14,15,16,21,22]],["Joseph Whidbey","sp",48.3085,-122.7131,206,1,"joseph-whidbey-state-park",[0,1,2,4,5,7,8,12,14,17,18],[1,2,6,8,12,13,14,15,16,21,34]],["Spencer Spit","sp",48.5369,-122.8603,200,1,"spencer-spit-state-park",[0,1,2,3,4,5,7,8,9,13,14,15,17,18,19],[0,1,2,3,4,5,6,8,12,13,14,16,17,20,21,22,26,30,31,32,40]],["Fort Simcoe","hist",46.3426,-120.8392,196,1,"fort-simcoe-historical-state-park",[0,4,12],[1,6,8,12,13,14,16,18,21,22,30]],["Wenatchee Confluence","sp",47.455,-120.3233,194,1,"wenatchee-confluence-state-park",[0,1,2,3,4,5,7,8,9,13,20],[0,1,2,3,4,6,7,8,10,11,12,13,14,15,16,17,18,19,21,22,23,25,26,28,29,30,33,34,35,36,37,38,40,44]],["Twanoh","sp",47.3749,-122.9738,188,1,"twanoh-state-park",[0,1,2,3,4,5,6,7,8,13,14,17],[0,2,3,4,6,7,8,10,14,15,16,18,21,22,25,28,30,32,37,40,42]],["Hope Island (Skagit)","mar",48.3988,-122.5691,181,0,"hope-island-marine-state-park-skagit-county",[0,1,2,5,7,8,13,14],[6,14,32,40]],["Rasar","sp",48.5166,-121.9039,180,1,"rasar-state-park",[0,2,3,4,6,9,11,13,14],[0,1,2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19,21,22,23,26,30,31,34,39]],["Alta Lake","sp",48.0283,-119.9378,174,1,"alta-lake-state-park",[0,1,2,3,4,5,6,7,8],[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]],["Lyons Ferry","sp",46.5971,-118.2189,168,1,"lyons-ferry-state-park",[0,1,3,4,5,7,8,12],[1,6,7,8,10,11,12,13,14,15,16,22,34]],["Steptoe Butte","her",47.0348,-117.2932,168,1,"steptoe-butte-state-park-heritage-site",[0,4,12,25],[1,6,8,12,14,15,16,22,25]],["Tolmie","sp",47.1204,-122.7758,159,1,"tolmie-state-park",[0,1,3,4,5,6,7,8,14,17,18,19,21],[1,2,3,6,12,13,14,15,16,21,22,25,28,32,33,39,40,41]],["Lake Chelan","sp",47.8725,-120.1966,139,1,"lake-chelan-state-park",[0,1,2,3,4,5,6,7,8,13,19],[0,1,2,3,4,6,7,8,10,11,12,14,15,16,17,19,20,21,26,27,28,30,33,34,39,49]],["Saltwater","sp",47.3758,-122.3231,137,1,"saltwater-state-park",[0,3,4,5,6,7,8,12,14,19,21],[1,3,5,6,8,12,13,14,15,16,19,20,21,22,25,30,34]],["Hope Island (Mason)","mar",47.187,-122.9286,132,0,"hope-island-marine-state-park-mason-county",[0,1,2,3,4,5,7,8,13,14,17],[6,14,21,22,32,40]],["Rainbow Falls","sp",46.6287,-123.2309,129,1,"rainbow-falls-state-park",[0,2,3,4,6,8,9,10,12,13,29],[0,1,2,3,4,6,7,8,12,14,15,16,18,21,23,24,26,28,33]],["Bogachiel","sp",47.8964,-124.3606,127,1,"bogachiel-state-park",[0,2,4,6,8,13],[3,4,6,7,8,13,14,15,16,17,21,28]],["Daroga","sp",47.7092,-120.2022,127,1,"daroga-state-park",[0,1,2,3,4,5,6,7,8,9,20],[0,1,2,3,4,6,7,8,10,11,12,13,14,15,16,17,18,19,21,23,26,28,29,30,32,33,34,35,36,37,38,44,45]],["Manchester","sp",47.577,-122.555,126,1,"manchester-state-park",[0,1,2,3,4,5,6,7,8,9,13,14,18,19,20],[0,1,2,3,4,6,7,8,12,13,14,15,16,17,18,19,21,23,26,31]],["Scenic Beach","sp",47.6492,-122.8456,121,1,"scenic-beach-state-park",[0,2,3,4,5,6,7,8,9,13,14,15,19,20],[2,3,4,6,7,8,13,14,15,16,17,18,21,25,26,28,30]],["Schafer","sp",47.0978,-123.4659,114,1,"schafer-state-park",[0,1,2,3,4,5,6,7,8,9,12],[0,1,2,3,4,6,7,8,9,12,13,14,15,16,17,18,21,22,26,28,45]],["Nolte","sp",47.2682,-121.942,111,1,"nolte-state-park",[0,1,3,4,5,6,7,8,9,12],[1,2,6,8,10,12,13,14,15,16,18,21,22,23,30]],["Palouse Falls","her",46.6649,-118.2264,107,1,"palouse-falls-state-park-heritage-site",[0,12],[6,8,12,13,14,15,16,22,25,34,46]],["Joemma Beach","sp",47.2254,-122.8055,106,1,"joemma-beach-state-park",[0,1,2,3,4,5,6,7,8,9,14,19],[0,1,2,3,4,6,8,10,11,13,14,15,16,21,32,40]],["Paradise Point","sp",45.8671,-122.7037,101,1,"paradise-point-state-park",[0,1,2,3,4,5,7,8,9,13,22],[0,1,2,3,4,5,6,7,8,12,14,15,16,17,21,26,35,39]],["Belfair","sp",47.4318,-122.8764,96,1,"belfair-state-park",[0,2,3,4,5,7,8,9,13,14,15,17],[0,1,2,3,4,6,7,8,12,13,14,15,16,17,20,21,25,26,28,30,31,34,36]],["Conconully","sp",48.5521,-119.7471,94,1,"conconully-state-park",[0,1,2,3,5,7,8,9],[0,1,2,3,4,6,7,10,11,12,13,14,15,16,17,18,26,28,30]],["Sequim Bay","sp",48.0401,-123.029,93,1,"sequim-bay-state-park",[0,1,2,3,4,5,6,7,9,13,14,17,18,19],[0,1,2,3,4,5,6,7,8,10,13,14,15,16,17,18,21,22,23,26,28,29,30,32,34,36,37,38,39,40]],["Curlew Lake","sp",48.7189,-118.6607,87,1,"curlew-lake-state-park",[0,1,2,3,4,5,7,8,9,27],[0,1,2,3,4,6,7,10,11,12,14,15,16,17,21,23,39,42]],["Illahee","sp",47.598,-122.5978,86,1,"illahee-state-park",[0,1,2,3,4,5,6,7,8,9,12,13,14,17,18,19,20],[0,1,2,3,4,6,7,8,11,13,14,15,16,17,18,21,22,25,26,28,29,30,32,40]],["Lincoln Rock","sp",47.5349,-120.2833,86,1,"lincoln-rock-state-park",[0,1,2,3,4,5,6,7,8,9,12,13,20,21],[0,1,2,3,4,6,7,8,10,11,12,13,14,15,16,17,18,19,20,21,22,23,25,26,27,28,29,30,33,34,35,36,37,38,39,44,49]],["Potlatch","sp",47.3619,-123.1553,84,1,"potlatch-state-park",[0,1,2,3,5,7,8,9,13,14,15,17,19],[0,1,2,3,6,7,8,13,14,15,16,17,21,22,32,39,40]],["Maryhill","sp",45.6822,-120.8339,81,1,"maryhill-state-park",[0,1,2,3,8,13,14,15,22],[0,1,2,3,6,7,8,10,11,12,13,14,15,16,17,26,28,31]],["Obstruction Pass","sp",48.6052,-122.8274,80,1,"obstruction-pass-state-park",[0,1,2,3,4,5,8,13,14,17,18],[3,6,14,16,21,32,40]],["Jarrell Cove","sp",47.2844,-122.8852,67,1,"jarrell-cove-state-park",[0,1,2,3,5,7,8,9,13,14,19],[0,1,2,3,6,7,8,11,12,13,14,16,18,21,32,39,40,42]],["Kinney Point","prop",48.0109,-122.687,67,1,"kinney-point-state-park-property",[0,1,2,3,4,5,7,14,17],[6,21]],["Bay View","sp",48.4886,-122.4787,66,1,"bay-view-state-park",[0,2,3,4,5,6,7,8,11,13,14,15],[0,1,2,3,4,5,6,7,8,12,13,14,15,16,17,22,26,29]],["Bottle Beach","sp",46.8954,-124.04,64,0,"bottle-beach-state-park",[0,4,14],[6,15,16,21,22,34,41]],["Kitsap Memorial","sp",47.8178,-122.6494,59,1,"kitsap-memorial-state-park",[0,1,2,3,4,5,6,7,8,9,13,14,15,18,19,20],[1,2,3,4,5,6,7,8,14,15,16,18,19,21,22,25,26,28,29,30,32,35,39,40]],["Beebe Bridge","sp",47.8079,-119.9735,56,1,"beebe-bridge-state-park",[0,1,2,3,4,5,7,8,15],[0,1,2,3,6,7,8,10,11,12,13,14,16,17,18,19,23,29,30,32,33,35,36,37]],["Clark Island","mar",48.7006,-122.7641,50,1,"clark-island-marine-state-park",[0,1,2,3,4,5,7,8,13,14,17,18],[3,6,14,32,40]],["Lime Kiln Point","sp",48.5163,-123.1499,41,1,"lime-kiln-point-state-park",[0,4,14,24],[1,2,4,6,8,14,15,16,20,21,22,34,43]],["Crawford","her",48.9947,-117.3704,40,1,"crawford-state-park-heritage-site",[0,4,11,12,24,26],[2,6,13,14,16,21,22]],["Lewis and Clark Trail","sp",46.2884,-118.0723,36,1,"lewis-and-clark-trail-state-park",[0,2,3,4,6,8,12],[0,1,2,3,4,6,7,8,12,14,15,16,17,21,22,26,28,29,33]],["Peshastin Pinnacles","sp",47.5396,-120.5199,34,1,"peshastin-pinnacles-state-park",[0,4,20],[1,6,8,14,15,16,21,35]],["Turn Island","mar",48.5331,-122.9716,34,0,"turn-island-marine-state-park",[0,1,2,3,4,5,7,8,13,14,17,18,19],[6,14,21,32,40]],["Triton Cove","sp",47.6062,-122.986,30,1,"triton-cove-state-park",[0,1,3,5,6,7,8,14,17,18,19],[6,8,10,14,25,44]],["Saddlebag Island","mar",48.5359,-122.5566,25,1,"saddlebag-island-marine-state-park",[0,1,2,3,4,5,7,8,14,17,18,19],[3,6,14,21]],["Skagit Island","mar",48.4134,-122.5791,25,1,"skagit-island-marine-state-park",[0,1,2,3,4,5,7,8,14],[14,21,32,40]],["Peace Arch","hist",49.0014,-122.7526,19,1,"peace-arch-historical-state-park",[0,4],[1,2,4,5,6,8,12,13,14,15,16,22,25,28,30,33,35,50,51]],["Mystery Bay","sp",48.0589,-122.6943,18,1,"mystery-bay-state-park",[0,1,3,5,6,7,8,14,17,18,19],[2,3,6,8,10,11,13,14,16,32,42]],["Pacific Beach","sp",47.2057,-124.2025,17,1,"pacific-beach-state-park",[0,2,3,6,13,14,17],[0,1,2,4,6,7,8,9,14,15,16,17]],["Doe Island","mar",48.6328,-122.7876,10,1,"doe-island-marine-state-park",[0,1,2,3,4,5,7,13,14,17,18],[3,6,11,14,21,32]],["Pacific Pines","sp",46.502,-124.0554,10,1,"pacific-pines-state-park",[0,3,14,17,18],[2,6,12,14,16]],["Spring Creek Hatchery","sp",45.7238,-121.5581,10,1,"spring-creek-hatchery-state-park",[0,3,5,7,11,15],[1,14,16,25]],["Eagle Island","mar",47.188,-122.6965,5,1,"eagle-island-marine-state-park",[0,1,3,5,7,8,14,15,17],[32,40]],["Goldendale Observatory","her",45.8387,-120.8151,5,0,"goldendale-observatory-state-park-heritage-site",[24],[1,6,15,16,22,25,35,46]],["Matia Island","mar",48.7484,-122.8389,5,0,"matia-island-marine-state-park",[0,1,2,3,4,5,7,8,13,14,17,18,19],[6,11,21,32,40]],["Steptoe Battlefield","her",47.2288,-117.3644,3,1,"steptoe-battlefield-state-park-heritage-site",[0],[8,14,16,22]],["Blind Island","mar",48.585,-122.9371,2,1,"blind-island-marine-state-park",[1,3,5,7,14,18],[3,6,14,32,40]],["Jackson House","her",46.5413,-122.8225,1,0,"jackson-house-state-park-heritage-site",[],[14,15,16,22]],["Pleasant Harbor","prop",47.6646,-122.9139,1,1,"pleasant-harbor-state-park-property",[0,1,3,8,17,18,19],[6,11,16,32]],["Posey Island","sp",48.6183,-123.168,1,1,"posey-island-state-park",[0,1,2,3,4,5,7,8,13,14,18],[3,6,14]],["Wanapum Recreation Area","sp",46.9005,-119.9929,0,1,"wanapum-recreation-area",[0,1,2,3,4,8,12],[0,1,2,3,4,6,7,8,10,11,12,14,15,16,25,44]],["Willie Keil's Grave","her",46.6455,-123.6613,0,1,"willie-keils-grave-state-park-heritage-site",[29],[16,22]]]};
+
+function openLink(url){ window.open(url,'_blank','noopener'); }
+
+const CATO=[["sp","State park","#2a78d6"],["mar","Marine park","#1baf7a"],["hist","Historical park","#eb6834"],["her","Heritage site","#7f77dd"],["tr","Trail","#eda100"],["prop","Property","#898781"]];
+const CC=Object.fromEntries(CATO.map(c=>[c[0],[c[1],c[2]]]));
+const DOGO=[["all","All parks"],["allow","Parks that allow dogs"],["no","Parks that don't allow dogs"]];
+const P=D.P.map(r=>({name:r[0],cat:r[1],lat:r[2],lon:r[3],ac:r[4],dog:r[5],slug:r[6],a:new Set(r[7]),m:new Set(r[8])}));
+const fmt=new Intl.NumberFormat('en-US');
+const dk=matchMedia('(prefers-color-scheme: dark)').matches;
+const ld=dk?'#2c2c2a':'#e8e7e0', eg=dk?'#4a4a46':'#c3c2b7';
+const W=680,H=430;
+const rad=d3.scaleSqrt().domain([1,12553]).range([3.5,16]).clamp(true);
+const cats=new Set(CATO.map(c=>c[0])), selA=new Set(), selM=new Set();
+let dog='all', query='', hover=null, zk=1, nd=null;
+function dogOK(p,d){return d==='all'?true:d==='allow'?p.dog!==0:p.dog===0}
+
+const DDS=['ddA','ddM','ddC','ddD'];
+DDS.forEach(id=>document.getElementById(id).addEventListener('toggle',function(){
+  if(this.open)DDS.filter(o=>o!==id).forEach(o=>document.getElementById(o).removeAttribute('open'));
+}));
+document.addEventListener('click',e=>{
+  if(!e.target.closest('details.dd'))DDS.forEach(o=>document.getElementById(o).removeAttribute('open'));
+});
+
+const sv=d3.select('#map').append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('width','100%').style('display','block').attr('role','img')
+  .attr('aria-label','Filterable map of Washington state parks');
+const gg=sv.append('g'); const tp=document.getElementById('tip');
+
+d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json').then(us=>{
+  const wa=topojson.feature(us,us.objects.states).features.find(f=>f.properties.name==='Washington');
+  const pj=d3.geoConicConformal().parallels([47,48.5]).rotate([120,0]).fitExtent([[12,12],[W-12,H-12]],wa);
+  gg.append('path').attr('d',d3.geoPath(pj)(wa)).attr('fill',ld).attr('stroke',eg).attr('stroke-width',1);
+  P.forEach(p=>{const c=pj([p.lon,p.lat]);p.x=c[0];p.y=c[1]});
+  nd=gg.append('g').selectAll('circle').data(P).join('circle')
+    .attr('cx',p=>p.x).attr('cy',p=>p.y).attr('r',p=>rad(p.ac))
+    .attr('fill',p=>CC[p.cat][1]).attr('stroke',p=>CC[p.cat][1])
+    .attr('fill-opacity',0.45).attr('stroke-width',1).style('cursor','pointer');
+
+  function vis(p){
+    if(!cats.has(p.cat))return false;
+    if(query&&!p.name.toLowerCase().includes(query))return false;
+    if(!dogOK(p,dog))return false;
+    for(const i of selA)if(!p.a.has(i))return false;
+    for(const i of selM)if(!p.m.has(i))return false;
+    return true;
+  }
+  function paint(){
+    nd.attr('display',p=>vis(p)?null:'none')
+      .attr('fill-opacity',p=>hover?(p.name===hover?0.95:0.2):0.45)
+      .attr('stroke-width',p=>(p.name===hover?2:1)/zk);
+  }
+  function buildAttr(pnl,vocab,sel,key){
+    document.getElementById(pnl).innerHTML=vocab.map((v,i)=>({v,i,n:P.filter(p=>p[key].has(i)).length}))
+      .sort((a,b)=>b.n-a.n)
+      .map(o=>`<label class="opt"><input type="checkbox" data-i="${o.i}"${sel.has(o.i)?' checked':''}><span>${o.v}</span><span class="c">${o.n}</span></label>`).join('');
+    document.querySelectorAll(`#${pnl} input`).forEach(cb=>cb.addEventListener('change',()=>{
+      const i=+cb.dataset.i; cb.checked?sel.add(i):sel.delete(i); render();
+    }));
+  }
+  function buildCat(){
+    document.getElementById('pnlC').innerHTML=CATO.map(([k,lbl,col])=>
+      `<label class="opt"><input type="checkbox" data-k="${k}"${cats.has(k)?' checked':''}><span class="sw" style="background:${col}"></span><span>${lbl}</span><span class="c">${P.filter(p=>p.cat===k).length}</span></label>`).join('');
+    document.querySelectorAll('#pnlC input').forEach(cb=>cb.addEventListener('change',()=>{
+      const k=cb.dataset.k;
+      cb.checked?cats.add(k):cats.delete(k);
+      if(!cats.size){cats.add(k);cb.checked=true}
+      render();
+    }));
+  }
+  function buildDog(){
+    document.getElementById('pnlD').innerHTML=DOGO.map(([k,lbl])=>
+      `<label class="opt"><input type="radio" name="dogr" data-k="${k}"${dog===k?' checked':''}><span>${lbl}</span><span class="c">${P.filter(p=>dogOK(p,k)).length}</span></label>`).join('');
+    document.querySelectorAll('#pnlD input').forEach(rb=>rb.addEventListener('change',()=>{
+      dog=rb.dataset.k; document.getElementById('ddD').removeAttribute('open'); render();
+    }));
+  }
+  window.render=function(){
+    const f=P.filter(vis);
+    document.getElementById('cnt').textContent=`${f.length} of ${P.length}`;
+    document.getElementById('empty').style.display=f.length?'none':'flex';
+    document.getElementById('sA').textContent=selA.size?`Activities (${selA.size})`:'Activities';
+    document.getElementById('sM').textContent=selM.size?`Amenities (${selM.size})`:'Amenities';
+    document.getElementById('sC').textContent=cats.size<CATO.length?`Park type (${cats.size})`:'Park type';
+    document.getElementById('sD').textContent=dog==='all'?'Dogs':(dog==='allow'?'Dogs: allowed':'Dogs: not allowed');
+    const ch=[...[...selA].map(i=>['a',i,D.A[i]]),...[...selM].map(i=>['m',i,D.M[i]])];
+    if(cats.size<CATO.length)CATO.filter(c=>cats.has(c[0])).forEach(c=>ch.push(['c',c[0],c[1]]));
+    if(dog!=='all')ch.push(['d',dog,DOGO.find(o=>o[0]===dog)[1]]);
+    document.getElementById('chips').innerHTML=ch.map(([t,i,v])=>
+      `<span class="chip" data-t="${t}" data-i="${i}">${v} <span style="color:var(--text-muted)">✕</span></span>`).join('');
+    document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{
+      const t=c.dataset.t;
+      if(t==='c'){ if(cats.size>1){cats.delete(c.dataset.i);buildCat();} }
+      else if(t==='d'){ dog='all'; buildDog(); }
+      else{ const i=+c.dataset.i,s=t==='a'?selA:selM; s.delete(i);
+        const cb=document.querySelector(`#pnl${t==='a'?'A':'M'} input[data-i="${i}"]`); if(cb)cb.checked=false; }
+      render();
+    }));
+    paint();
+  };
+  function st(p,ev){
+    const b=document.getElementById('wrap').getBoundingClientRect();
+    const acts=[...p.a].slice(0,4).map(i=>D.A[i]).join(', ');
+    const dogtxt=p.dog===1?'Dogs on leash':p.dog===0?'No dogs':'Dog policy not listed';
+    tp.innerHTML=`<span style="font-weight:500">${p.name}</span><br><span style="color:var(--text-secondary)">${CC[p.cat][0]} · ${p.ac?fmt.format(p.ac)+' acres':'acreage n/a'} · ${dogtxt}</span>`
+      +(acts?`<br><span style="color:var(--text-muted);font-size:12px">${acts}${p.a.size>4?' +'+(p.a.size-4)+' more':''}</span>`:'');
+    tp.style.opacity=1;
+    const x=ev.clientX-b.left,y=ev.clientY-b.top;
+    tp.style.left=Math.min(Math.max(x+14,4),b.width-tp.offsetWidth-4)+'px';
+    tp.style.top=Math.max(y-tp.offsetHeight-10,4)+'px';
+  }
+  nd.on('mousemove',(ev,p)=>{hover=p.name;st(p,ev);paint()})
+    .on('mouseleave',()=>{hover=null;tp.style.opacity=0;paint()})
+    .on('click',(ev,p)=>openLink('https://parks.wa.gov/find-parks/state-parks/'+p.slug));
+
+  buildAttr('pnlA',D.A,selA,'a'); buildAttr('pnlM',D.M,selM,'m'); buildCat(); buildDog();
+  document.getElementById('q').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();render()});
+  const zm=d3.zoom().scaleExtent([1,20]).translateExtent([[0,0],[W,H]]).on('zoom',ev=>{
+    gg.attr('transform',ev.transform); zk=ev.transform.k;
+    nd.attr('r',p=>rad(p.ac)/Math.sqrt(zk)).attr('stroke-width',p=>(p.name===hover?2:1)/zk);
+  });
+  sv.call(zm);
+  document.getElementById('rst').addEventListener('click',()=>{
+    selA.clear();selM.clear();dog='all';query='';
+    cats.clear();CATO.forEach(c=>cats.add(c[0]));
+    document.getElementById('q').value='';
+    document.querySelectorAll('.pnl input[type=checkbox]').forEach(c=>c.checked=false);
+    buildCat();buildDog();
+    sv.transition().duration(400).call(zm.transform,d3.zoomIdentity);
+    render();
+  });
+  render();
+}).catch(()=>{
+  document.getElementById('map').innerHTML='<p style="padding:40px 16px;text-align:center;color:var(--text-secondary);font-size:14px">The state outline couldn\'t load. Check your connection and refresh the page.</p>';
+});
+</script>
+</body>
+</html>
